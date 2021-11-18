@@ -56,11 +56,10 @@ Notice that we are considering the log2(x+1) of the counts.
 ## Overview of data
 
 
-|   | CD4 | CD8  |  
-|---|---|---|---|---|
-| N. Samples   | Resting=68; Activated=51 | Resting=63; Activated=21 |   
-| N. Individuals   | MS=11; HP=7 | MS=11; HP=7 |   
-| N. Complete individuals  | MS=5; HP=4 | MS=5; HP=3 |   
+|                          | CD4                      | CD8                      |  
+| N. Samples               | Resting=68; Activated=51 | Resting=63; Activated=21 |   
+| N. Individuals           | MS=11; HP=7              | MS=11; HP=7              |   
+| N. Complete individuals  | MS=5; HP=4               | MS=5; HP=3               |   
 
 We had sent 240 samples, we got back 203. Since the lost samples are randomly distributed across individuals and timepoints so it does not change the Limma pipeline. 
 
@@ -84,11 +83,12 @@ We start by looking at the data ‘by eye’ with a PCA plot.
 
 **CD4** 
 
- 
+ <img src="RNAseq/figures/pca12_cd4.png" width="400"/>
 
 **CD8** 
 
- 
+  <img src="RNAseq/figures/pca12_cd8.png" width="400"/>
+
 
 The PCA plots suggest that MS has a significant effect, especially for CD4. Then, as expected, the samples of each individual tend to cluster together. The effect of time is less evident. It is important to note that the samples cluster less with Sample_Site, as compared to the methylation data. This is a batch effect we cannot remove since it overlaps with the biological variable Disease (HP samples were gathered in Kalmar only). 
 
@@ -104,45 +104,46 @@ Where the Individual effect is blocked by the Limma function duplicateCorrelatio
 
 **CD4.** The distribution of p-values of MS and 3rd trimester suggest that these two factors have a significant biological effect on the data. Arguably the same can be said about PP (PostPartum). The 2nd trimester on the other hand seems to not play a role at all in explaining the data. 
 
- 
+ <img src="RNAseq/figures/pval_cd4.png" width="400"/>
 
 The number of DE genes that survive FDR are 78 for the 3rd semester and 71 for MS. Moreover, the genes nominally significant for both 3rd trimester and MS have a significant overlap with an independent list of MS-associated genes obtained by GWAS data (data/annotated_MS_SNPs_proc.xlsx). 
 
 Pathway enrichment analysis of the genes with a p-value<0.01 reveals interesting pathways, as can be seen below. The pathways were corrected for the background (I.e. all the genes we measured). 
 
- 
-
-  
+  <img src="RNAseq/figures/kegg_cd4.png" width="400"/>
 
 We are also interested in looking at which genes are differentially expressed between MS and HP at each timepoint. 
 
- 
+   <img src="RNAseq/figures/pval_cd4_MSvsHP.png" width="400"/>
+
 
 Unfortunately, no gene survives FDR. However, the nominally DE genes in the comparison at PP significantly overlap with the aforementioned list. The pathway enrichment analysis is also less striking.  
 
- 
+    <img src="RNAseq/figures/kegg_cd4_MSvsHP.png" width="400"/>
 
- 
+
 
 Development over time. The only significant change happens from the 3rd trimester to PP, both for HP and MS. In particular, the HP samples highlight the JAK-STAT, cytokine-cytokine, and Prolacting pathways as differentially regulated between these two timepoints; on the other hand, the MS samples reveal the JAK-STAT and NOD-like receptor signaling pathway. The majority of the genes appear to be downregulated in PP compared to 3rd trimester. 
 
 **CD8.** Interestingly, we can make similar observations to the CD4 case: MS and 3rd are still the two factors which have a clear signal, and 2nd trimester still does not play a role. 33 genes survived FDR in the 3rd trimester and 204 in MS. As in the CD4 case, both sets of nominally significant genes were enriched for the independent list of genes aforementioned. 
 
- 
+ <img src="RNAseq/figures/pca12_cd8.png" width="400"/>
 
- 
 
 The pathways associated with the genes with a p-value<0.01 are also interesting here. The following plot is not corrected for background; however, if we do correct, the pathways that are left are JAK-STAT and Prolacting, which confirms the importance of the 3rd semester. 
 
- 
+   <img src="RNAseq/figures/kegg_cd8.png" width="400"/>
+
 
  Regarding the comparison MS versus HP, only 3 genes survive FDR in the PP comparison and, as in the CD4 case, the nominally significant genes in PP significantly overlap with the independent list. 
 
- 
+    <img src="RNAseq/figures/pval_cd8_MSvsHP.png" width="400"/>
+
 
 The pathways are not super interesting. 
 
-Inserting image... 
+    <img src="RNAseq/figures/kegg_cd8_MSvsHP.png" width="400"/>
+ 
 
 Development over time. In the MS samples 8 genes survive FDR (all in the comparison 3rd vs PP). What is interesting is that the top genes are connected to interesting pathways, also for the 3rd versus 2nd semester comparison. Nothing of interest came out of the HP samples.  
 
@@ -153,8 +154,9 @@ Development over time. In the MS samples 8 genes survive FDR (all in the compari
 From these analyses, CD4 and CD8 seem to be quite similar, hence the idea of merging the two datasets and using cell type as a covariate. A quick look at the PCA shows that the samples cluster according to cell type (I.e. on the first PC), and secondarily (I.e. on the second PC) on Disease. 
 
  
+    <img src="RNAseq/figures/pca12_merged.png" width="400"/>
 
- 
+
 
 Differential analysis of the model 
 ```
@@ -162,16 +164,14 @@ G = β_0 + β_1 Disease + β_2 Timepoint + β_3 Sample_Type,
 ```
 
 where Sample_Type = {CD4, CD8}, shows that  
-
-around 8,000 genes are DE after FDR in for cell type,  
-
-700 for disease  
-
- 200 for the 3rd trimester.  
+  - around 8,000 genes are DE after FDR in for cell type,  
+  - 700 for disease  
+  - 200 for the 3rd trimester.  
 
 Interestingly, the nominally significant genes from the first and third list are significantly overlapping with the most list recent MS-associated genes. 
 
  
+    <img src="RNAseq/figures/kegg_merged.png" width="400"/>
 
  
 
@@ -182,6 +182,7 @@ Interestingly, the nominally significant genes from the first and third list are
 We can also try to include the activated samples in the mix. The PCA reveals a nice separation between activation (1st PC) and cell type (2nd PC). However, it is important to include cell viability as a in the model because resting cells have a significantly higher value (mean of 86 vs 70). 
 
  
+    <img src="RNAseq/figures/pca12_merged_activation.png" width="400"/>
 
  
 
@@ -200,15 +201,9 @@ In particular, the nominally significant genes out of State, MS, 3rd trimester a
 
 However, if we follow the results for pathway enrichment analysis, the most interesting genes are those in the 3rd timepoint and cell type. 
 
- 
+     <img src="RNAseq/figures/kegg_merged_activation.png" width="400"/>
 
- 
 
- 
-
- 
-
- 
 
 ### Clustering 
 
@@ -230,7 +225,7 @@ It is interesting to look at the behavior over time of the nominally DEG genes e
 
  
 
-**HP CD8 **
+**HP CD8**
 
 
 
