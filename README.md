@@ -25,3 +25,5 @@ We use Combat_seq (https://rdrr.io/bioc/sva/man/ComBat_seq.html) to do batch cor
 
  
 During the normalization, we make sure that the core of the signal (i.e., variables ‘Disease’, ‘State’ and ‘Sample_type’ in the metadata) is conserved by using the option ‘covar_mod’ in Combat_seq.  
+
+![](RNAseq/figures/pca_before_norm.png?raw=true)
