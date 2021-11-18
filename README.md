@@ -83,7 +83,7 @@ We start by looking at the data ‘by eye’ with a PCA plot.
 
 **CD4** 
 
- <img src="RNAseq/figures/pca12_cd4.png" width="400"/>
+  <img src="RNAseq/figures/pca12_cd4.png" width="400"/>
 
 **CD8** 
 
