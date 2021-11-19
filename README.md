@@ -114,12 +114,12 @@ Pathway enrichment analysis of the genes with a p-value<0.01 reveals interesting
 
 We are also interested in looking at which genes are differentially expressed between MS and HP at each timepoint. 
 
-   <img src="RNAseq/figures/pval_cd4_MSvsHP.png" width="400"/>
+  <img src="RNAseq/figures/pval_cd4_MSvsHP.png" width="400"/>
 
 
 Unfortunately, no gene survives FDR. However, the nominally DE genes in the comparison at PP significantly overlap with the aforementioned list. The pathway enrichment analysis is also less striking.  
 
-    <img src="RNAseq/figures/kegg_cd4_MSvsHP.png" width="400"/>
+  <img src="RNAseq/figures/kegg_cd4_MSvsHP.png" width="400"/>
 
 
 
@@ -132,17 +132,17 @@ Development over time. The only significant change happens from the 3rd trimeste
 
 The pathways associated with the genes with a p-value<0.01 are also interesting here. The following plot is not corrected for background; however, if we do correct, the pathways that are left are JAK-STAT and Prolacting, which confirms the importance of the 3rd semester. 
 
-   <img src="RNAseq/figures/kegg_cd8.png" width="400"/>
+ <img src="RNAseq/figures/kegg_cd8.png" width="400"/>
 
 
  Regarding the comparison MS versus HP, only 3 genes survive FDR in the PP comparison and, as in the CD4 case, the nominally significant genes in PP significantly overlap with the independent list. 
 
-    <img src="RNAseq/figures/pval_cd8_MSvsHP.png" width="400"/>
+  <img src="RNAseq/figures/pval_cd8_MSvsHP.png" width="400"/>
 
 
 The pathways are not super interesting. 
 
-    <img src="RNAseq/figures/kegg_cd8_MSvsHP.png" width="400"/>
+  <img src="RNAseq/figures/kegg_cd8_MSvsHP.png" width="400"/>
  
 
 Development over time. In the MS samples 8 genes survive FDR (all in the comparison 3rd vs PP). What is interesting is that the top genes are connected to interesting pathways, also for the 3rd versus 2nd semester comparison. Nothing of interest came out of the HP samples.  
@@ -154,7 +154,7 @@ Development over time. In the MS samples 8 genes survive FDR (all in the compari
 From these analyses, CD4 and CD8 seem to be quite similar, hence the idea of merging the two datasets and using cell type as a covariate. A quick look at the PCA shows that the samples cluster according to cell type (I.e. on the first PC), and secondarily (I.e. on the second PC) on Disease. 
 
  
-    <img src="RNAseq/figures/pca12_merged.png" width="400"/>
+ <img src="RNAseq/figures/pca12_merged.png" width="400"/>
 
 
 
@@ -182,7 +182,7 @@ Interestingly, the nominally significant genes from the first and third list are
 We can also try to include the activated samples in the mix. The PCA reveals a nice separation between activation (1st PC) and cell type (2nd PC). However, it is important to include cell viability as a in the model because resting cells have a significantly higher value (mean of 86 vs 70). 
 
  
-    <img src="RNAseq/figures/pca12_merged_activation.png" width="400"/>
+<img src="RNAseq/figures/pca12_merged_activation.png" width="400"/>
 
  
 
