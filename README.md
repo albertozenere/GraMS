@@ -1,27 +1,28 @@
 # GraMS
 
-Description of the GraMS (graviditet in MS).
+This repository contains the bioinformatics pipeline of the project GraMS (Graviditet in MS).
+ADD LINK TO ARTICLE.
 
 
-## Introduction 
 
-This document is meant to be a journal about the RNAseq processing. 
 
-In the first section we describe the preprocessing of the data (remove batch effects and normalize). In the second we present our differential analysis. 
+## Preprocessing of RNA-seq data
 
- 
+The first step of our pipeline is to remove batch effects, using the R package Combat_seq (https://rdrr.io/bioc/sva/man/ComBat_seq.html), which was built precisely for RNA-seq data. 
+Many factors could influence the data, such as disease, cell type, cell viability, age of the donor, etc. 
+To quantify the effect of each variable, we calculate p-values that express if a given factor is very similar to a given PCA component. This plot for the raw data can be found in . 
 
-## Preprocessing 
+```{r foo, fig.cap = "a figure"}
+knitr::include_graphics("pca_before_norm.png")
+```
 
-Remove batch effects 
+\@ref(fig:pca_before).
 
-Many factors could influence the data, such as disease, cell type, etc. 
 
-To quantify the effect of each we calculate p-values that express if a given factor is very similar to a given PCA component. This plot can be found in ‘figures/pca_before_norm.pdf’. 
 
 From this plot we notice that ‘Library_Batch’ has a significant p-value wrt the second PCA, thus it is worth to adjust its effect. 
 
-We use Combat_seq (https://rdrr.io/bioc/sva/man/ComBat_seq.html) to do batch correction, which was built precisely for RNAseq data. 
+
 
 <img src="RNAseq/figures/pca_before_norm.png" width="400"/>
  
