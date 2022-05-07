@@ -12,9 +12,8 @@ The first step of our pipeline is to remove batch effects, using the R package C
 Many factors could influence the data, such as disease, cell type, cell viability, age of the donor, etc. 
 To quantify the effect of each variable, we calculate p-values that express if a given factor is very similar to a given PCA component. This plot for the raw data can be found in . 
 
-```{r foo, fig.cap = "a figure"}
-knitr::include_graphics("pca_before_norm.png")
-```
+knitr::include_graphics("RNAseq/figures/pca_before_norm.png")
+
 
 \@ref(fig:pca_before).
 
@@ -24,7 +23,7 @@ From this plot we notice that ‘Library_Batch’ has a significant p-value wrt 
 
 
 
-<img src="RNAseq/figures/pca_before_norm.png" width="400"/>
+[//]: <img src="RNAseq/figures/pca_before_norm.png" width="400"/>
  
 During the normalization, we make sure that the core of the signal (i.e., variables ‘Disease’, ‘State’ and ‘Sample_type’ in the metadata) is conserved by using the option ‘covar_mod’ in Combat_seq.  
 
