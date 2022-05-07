@@ -4,6 +4,13 @@ This repository contains the bioinformatics pipeline of the project GraMS (Gravi
 ADD LINK TO ARTICLE.
 
 
+## Overview of data
+|                          | CD4                      | CD8                      |  
+| N. Samples               | Resting=68; Activated=51 | Resting=63; Activated=21 |   
+| N. Individuals           | MS=11; HP=7              | MS=11; HP=7              |   
+| N. Complete individuals  | MS=5; HP=4               | MS=5; HP=3               |   
+
+We had sent 240 samples, we got back 203. Since the lost samples are randomly distributed across individuals and timepoints so it does not change the Limma pipeline. 
 
 ## Preprocessing of RNA-seq data
 
@@ -38,17 +45,8 @@ count_tmm <- DGEList(count)
 count_tmm <- calcNormFactors(count_tmm, method="TMM") 
 ```
  
-These coefficients will then be passed to the limma function (https://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/limmaUsersGuide.pdf).
+These coefficients will then be passed to the limma function (https://bioconductor.org/packages/release/bioc/html/limma.html).
 
-## Overview of data
-
-
-|                          | CD4                      | CD8                      |  
-| N. Samples               | Resting=68; Activated=51 | Resting=63; Activated=21 |   
-| N. Individuals           | MS=11; HP=7              | MS=11; HP=7              |   
-| N. Complete individuals  | MS=5; HP=4               | MS=5; HP=3               |   
-
-We had sent 240 samples, we got back 203. Since the lost samples are randomly distributed across individuals and timepoints so it does not change the Limma pipeline. 
 
 ## Differential analysis
 
