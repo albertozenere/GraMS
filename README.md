@@ -7,35 +7,22 @@ ADD LINK TO ARTICLE.
 
 ## Preprocessing of RNA-seq data
 
+### Batch correction
+
 The first step of our pipeline is to remove batch effects, using the R package Combat_seq (https://rdrr.io/bioc/sva/man/ComBat_seq.html), which was built precisely for RNA-seq data. 
 Many factors could influence the data, such as disease, cell type, cell viability, age of the donor, etc. 
 To quantify the effect of each variable, we calculate p-values that express if a given factor is very similar to a given PCA component. 
 
-<img src="RNAseq/figures/pca_before_norm.png" width="400"/>
+<img src="RNAseq/figures/pca_before_norm.pdf" width="400"/>
 
 From this plot we notice that ‘Library_Batch’ has a significant p-value with respect to the second PCA, thus it is worth to adjust its effect. 
 We make sure that the core of the signal (i.e., variables ‘Disease’, ‘State’ and ‘Sample_type’ in the metadata) is conserved by using the option ‘covar_mod’ in Combat_seq.  
 
 The difference with or without batch correction is minimal, as can be seen from the next image; however, we consider more methodologically sound to keep it. 
 
-[//]: <img src="RNAseq/figures/pca_after_norm.png" width="400"/>
+[//]: <img src="RNAseq/figures/pca_after_norm.pdf" width="400"/>
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Normalization
+### Normalization
 
 It is important to normalize the data before doing differential analysis. In particular, we use the TMM normalization, which is part of the edgeR package (https://www.bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf). 
 
@@ -43,19 +30,15 @@ Before proceeding with the normalization, we convert the gene ids. The raw data 
 
 Moreover, we filter out genes that are lowly expressed by using the function filterByExpr in edgeR. In the end, we are left with 13.461 genes in CD4 and 13.456 in CD8. 
 
-The normalization is carried out on these genes by the function calcNormFactors, following this snippet of code: 
-
+The normalization coefficients are calculated by the function calcNormFactors, following this snippet of code: 
  
 ```
 count_tmm <- DGEList(count) 
 
 count_tmm <- calcNormFactors(count_tmm, method="TMM") 
-
-count_tmm <- cpm(count_tmm, log=TRUE) 
 ```
  
-
-Notice that we are considering the log2(x+1) of the counts. 
+These coefficients will then be passed to the limma function (https://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/limmaUsersGuide.pdf).
 
 ## Overview of data
 
