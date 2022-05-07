@@ -5,31 +5,35 @@ ADD LINK TO ARTICLE.
 
 
 
-
 ## Preprocessing of RNA-seq data
 
 The first step of our pipeline is to remove batch effects, using the R package Combat_seq (https://rdrr.io/bioc/sva/man/ComBat_seq.html), which was built precisely for RNA-seq data. 
 Many factors could influence the data, such as disease, cell type, cell viability, age of the donor, etc. 
-To quantify the effect of each variable, we calculate p-values that express if a given factor is very similar to a given PCA component. This plot for the raw data can be found in . 
+To quantify the effect of each variable, we calculate p-values that express if a given factor is very similar to a given PCA component. 
 
-knitr::include_graphics("RNAseq/figures/pca_before_norm.png")
+<img src="RNAseq/figures/pca_before_norm.png" width="400"/>
 
+From this plot we notice that ‘Library_Batch’ has a significant p-value with respect to the second PCA, thus it is worth to adjust its effect. 
+We make sure that the core of the signal (i.e., variables ‘Disease’, ‘State’ and ‘Sample_type’ in the metadata) is conserved by using the option ‘covar_mod’ in Combat_seq.  
 
-\@ref(fig:pca_before).
+The difference with or without batch correction is minimal, as can be seen from the next image; however, we consider more methodologically sound to keep it. 
 
-
-
-From this plot we notice that ‘Library_Batch’ has a significant p-value wrt the second PCA, thus it is worth to adjust its effect. 
-
-
-
-[//]: <img src="RNAseq/figures/pca_before_norm.png" width="400"/>
+[//]: <img src="RNAseq/figures/pca_after_norm.png" width="400"/>
  
-During the normalization, we make sure that the core of the signal (i.e., variables ‘Disease’, ‘State’ and ‘Sample_type’ in the metadata) is conserved by using the option ‘covar_mod’ in Combat_seq.  
 
-We check the result of the normalization in the plot ‘figures/pca_after_norm.pdf’. The difference with or without batch correction is minimal; however, we consider more methodologically sound to keep it. 
 
-The first two components of the PCA show that State (resting or activated) is the major factor in separating the data, as can be seen from ‘figures/pca12_before_norm.pdf’ and ‘figures/pca12_after_norm.pdf’. 
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Normalization
 
