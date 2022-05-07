@@ -1,6 +1,6 @@
 # GraMS
 
-This repository contains the bioinformatics pipeline of the project GraMS (Graviditet in MS).
+This repository contains the bioinformatics pipeline of the project GraMS (abbreviation from the Swedish title "Graviditet i MS").
 ADD LINK TO ARTICLE.
 
 It is structured as follows:
