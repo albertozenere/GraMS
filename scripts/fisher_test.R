@@ -1,4 +1,4 @@
-
+# Auxiliary function used by multiple function to execute Fisher's exact test
 
 
 fisher_test <- function(list_1, background ,list_2){
