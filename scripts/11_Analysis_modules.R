@@ -1,6 +1,17 @@
+# This script analyses the module genes from DIAMoND
+# Created and modified by Alberto Zenere, 2022-04-11
 
+# 11_Analysis_modules ####
+# 11.1 Setup
+# 11.2 Load files
+# 11.3 Save 
+# 11.4 Load seed genes
+# 11.5 MS-enrichment
+# 11.6 Enrichment of Activation
+# 11.7 Overlap with P4 genes
+
+# Setup ####
 rm(list=ls()) # remove all entries in the global environment 
-
 
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/P3/Lib/R/library"
@@ -16,17 +27,18 @@ require("pracma")
 require("ggpubr")
 library("ggvenn")
 
-# Set directory structure ####
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# My functions ####
+# My functions 
 source('probe_to_gene.R')
 source('fisher_test.R')
 
-# MS-associated genes ####
+# 11.2 Load files ####
+#MS-associated genes
 disgenet <- read.csv("data/MS_DisGeNET.txt", sep = "\t")
 disgenet_genes <- disgenet$geneSymbol %>% unique()
 
@@ -35,19 +47,19 @@ science_genes <- unique(science_genes$SYMBOL)
 
 MS_genes <- union(disgenet_genes, science_genes)
 
-# Load modules ####
+# Load modules 
 diamond_methyl_cd4 <- readRDS("RDS_files/diamond_methyl_cd4.RDS")$module_genes 
 diamond_methyl_cd8 <- readRDS("RDS_files/diamond_methyl_cd8.RDS")$module_genes 
 diamond_rna_cd4 <- readRDS("RDS_files/diamond_rna_cd4.RDS")$module_genes 
 diamond_rna_cd8 <- readRDS("RDS_files/diamond_rna_cd8.RDS")$module_genes 
 
-# Overlap ####
+# Overlap 
 g_cd4 <- intersect(diamond_methyl_cd4, diamond_rna_cd4)
 g_cd8 <- intersect(diamond_methyl_cd8, diamond_rna_cd8)
 
 global_module <- intersect(diamond_methyl_cd4,diamond_rna_cd4) %>% intersect(diamond_methyl_cd8) %>% intersect(diamond_rna_cd8)
 
-# Save ####
+# 11.3 Save ####
 write.table(diamond_methyl_cd4, "diamond_methyl_cd4.txt", col.names = F, row.names = F)
 write.table(diamond_methyl_cd8, "diamond_methyl_cd8.txt", col.names = F, row.names = F)
 write.table(diamond_rna_cd4, "diamond_rna_cd4.txt", col.names = F, row.names = F)
@@ -56,14 +68,13 @@ write.table(diamond_rna_cd8, "diamond_rna_cd8.txt", col.names = F, row.names = F
 write.table(g_cd4, "diamond_common_cd4.txt", col.names = F, row.names = F)
 write.table(g_cd8, "diamond_common_cd8.txt", col.names = F, row.names = F)
 
-# Load seed genes ####
+# 11.4 Load seed genes ####
 rna_cd4_seed <- read.table("gene_rebound_common_cd4.txt", header=F, row.names = NULL)$V1
 rna_cd8_seed <- read.table("gene_rebound_common_cd8.txt", header=F, row.names = NULL)$V1
 methyl_cd4_seed <- read.table("cpg_rebound_common_cd4_gene.txt", header=F, row.names = NULL)$V1
 methyl_cd8_seed <- read.table("cpg_rebound_common_cd8_gene_01.txt", header=F, row.names = NULL)$V1
 
-
-# Load methylation ####
+# Load Differential analysis files ####
 ProbeFeatures <- readRDS(file=paste0(FOLDER_RDS, "TH2636_ProbeFeatures_211123.RDS"))
 
 # CD4
@@ -121,7 +132,7 @@ cpg_gene <- probe_to_gene(list_cpg)
 cpg_gene$feature <- ProbeFeatures$feature[match( cpg_gene$cpg,  rownames(ProbeFeatures))] %>% as.character()
 cpg_gene <- cpg_gene[grep("TSS",cpg_gene$feature),]
 
-# MS-enrichment ####
+# 11.5 MS-enrichment ####
 ppi_network <- readRDS("data/ppi_network_symbol.RDS")
 ppi_genes <- unique(c(ppi_network$symbol1, ppi_network$symbol2))
 
@@ -176,7 +187,7 @@ p
 dev.off()
 
 
-#Enrichment of Activation ####
+# 11.6 Enrichment of Activation ####
 State_cd4 <- readRDS(paste0(FOLDER_RDS, "DMG/State_cd4.RDS"))
 genes_state_CD4 <- rownames(State_cd4)[State_cd4$adj.P.Val<0.05]
 
@@ -211,10 +222,9 @@ pdf("figures_manus/Act_enrich_common.pdf")
 ggarrange(p1,p2, nrow=1, ncol=2)
 dev.off()
 
-#Overlap module-module ####
+# Overlap module-module 
 fisher_test(diamond_rna_cd4, universe_cd4 %>% union(universe_methyl) %>% union(ppi_genes), diamond_methyl_cd4)
 fisher_test(diamond_rna_cd8, universe_cd8 %>% union(universe_methyl) %>% union(ppi_genes), diamond_methyl_cd8)
-
 
 # Overlap module-seed ####
 fisher_test(rna_cd4_seed, universe_cd4 %>% union(universe_methyl) %>% union(ppi_genes), diamond_methyl_cd4)
@@ -229,41 +239,32 @@ intersect(rna_cd8_seed,diamond_methyl_cd8)
 intersect(methyl_cd8_seed,diamond_rna_cd8)
 
 
-# Overlap with P4 genes ####
-P4_genes_up <- read.table("data/stimP424vsstim24_DEGs_up.txt")$SYMBOL %>% unique()
+# 10.7 Overlap with P4 genes ####
 P4_genes_down <- read.table("data/stimP424vsstim24_DEGs_down.txt")$SYMBOL %>% unique()
 
 #RNA-seq CD4 seed
-fisher_test(rna_cd4_seed, union(universe_cd4,P4_genes_up), P4_genes_up)
 f_rna_cd4_seed <- fisher_test(rna_cd4_seed, union(universe_cd4,P4_genes_down), P4_genes_down)
 
 #RNA-seq CD4 module
-fisher_test(diamond_rna_cd4, union(universe_cd4,P4_genes_up)  %>% union(ppi_genes), P4_genes_up)
 f_rna_cd4_diamond <- fisher_test(diamond_rna_cd4, union(universe_cd4,P4_genes_down)  %>% union(ppi_genes), P4_genes_down)
 
 #Methylation CD4 seed
-fisher_test(methyl_cd4_seed, union(universe_methyl,P4_genes_up) , P4_genes_up)
 f_methyl_cd4_seed <- fisher_test(methyl_cd4_seed, union(universe_methyl,P4_genes_down), P4_genes_down)
 
 #Methylation CD4 module
-fisher_test(diamond_methyl_cd4, union(universe_methyl,P4_genes_up) %>% union(ppi_genes), P4_genes_up)
 f_methyl_cd4_diamond <- fisher_test(diamond_methyl_cd4, union(universe_methyl,P4_genes_down) %>% union(ppi_genes), P4_genes_down)
 
 
 #RNA-seq CD8 seed
-fisher_test(rna_cd8_seed, union(universe_cd8,P4_genes_up), P4_genes_up)
 f_rna_cd8_seed <- fisher_test(rna_cd8_seed, union(universe_cd8,P4_genes_down), P4_genes_down)
 
 #RNA-seq CD8 module
-fisher_test(diamond_rna_cd8, union(universe_cd8,P4_genes_up)  %>% union(ppi_genes), P4_genes_up)
 f_rna_cd8_diamond <- fisher_test(diamond_rna_cd8, union(universe_cd8,P4_genes_down)  %>% union(ppi_genes), P4_genes_down)
 
 #Methylation CD8 seed
-fisher_test(methyl_cd8_seed, union(universe_methyl,P4_genes_up) , P4_genes_up)
 f_methyl_cd8_seed <- fisher_test(methyl_cd8_seed, union(universe_methyl,P4_genes_down), P4_genes_down)
 
 #Methylation CD8 module
-fisher_test(diamond_methyl_cd8, union(universe_methyl,P4_genes_up) %>% union(ppi_genes), P4_genes_up)
 f_methyl_cd8_diamond <- fisher_test(diamond_methyl_cd8, union(universe_methyl,P4_genes_down) %>% union(ppi_genes), P4_genes_down)
 
 #CD4 module
@@ -288,120 +289,6 @@ p <- ggplot(df, aes(x=group, y=OR)) + geom_bar(stat="identity")
 pdf("figures_manus/P4enrich.pdf", width=12)
 p
 dev.off()
-
-#Directionality of P4 genes ####
-g_cd4_up <- intersect(rna_cd4_seed, P4_genes_up)
-g_cd4_down <- intersect(rna_cd4_seed, P4_genes_down)
-
-g_cd8_up <- intersect(rna_cd8_seed, P4_genes_up)
-g_cd8_down <- intersect(rna_cd8_seed, P4_genes_down)
-
-sum(CD4_2nd_1st_HP_rna[g_cd4_up, "logFC"]>0)/length(g_cd4_up)
-sum(CD4_3rd_1st_HP_rna[g_cd4_down, "logFC"]>0)/length(g_cd4_down)
-
-sum(CD8_2nd_1st_HP_rna[g_cd8_up, "logFC"]>0)/length(g_cd8_up)
-sum(CD8_3rd_1st_HP_rna[g_cd8_down, "logFC"]>0)/length(g_cd8_down)
-
-
-g <- intersect(P4_genes_down, methyl_cd4_seed)
-cpg <- cpg_gene$cpg[cpg_gene$gene %in% g]
-sum(CD4_3rd_1st_HP_methyl[cpg, "logFC"]>0)/length(cpg)
-
-g <- intersect(P4_genes_down, methyl_cd8_seed)
-cpg <- cpg_gene$cpg[cpg_gene$gene %in% g]
-sum(CD8_3rd_1st_HP_methyl[cpg, "logFC"]>0)/length(cpg)
-
-
-
-
-#Learning from Nature ####
-g_learning <- c("SOCS2", "TNFAIP3", "NR4A2", "CXCR4", "ZFP36L1", "POLR2J", "FAM49B", "STAG3L1")
-
-sum(CD4_3rd_1st_HP_rna[intersect(g_learning, rownames(CD4_3rd_1st_HP_rna)), "logFC"]>0)/ length(intersect(g_learning, rownames(CD4_3rd_1st_HP_rna)))
-sum(CD4_3rd_1st_MS_rna[intersect(g_learning, rownames(CD4_3rd_1st_MS_rna)), "logFC"]>0)/ length(intersect(g_learning, rownames(CD4_3rd_1st_MS_rna)))
-
-sum(CD8_3rd_1st_HP_rna[intersect(g_learning, rownames(CD8_3rd_1st_HP_rna)), "logFC"]>0)/ length(intersect(g_learning, rownames(CD8_3rd_1st_HP_rna)))
-sum(CD8_3rd_1st_MS_rna[intersect(g_learning, rownames(CD8_3rd_1st_MS_rna)), "logFC"]>0)/ length(intersect(g_learning, rownames(CD8_3rd_1st_MS_rna)))
-
-#Activation ####
-State_cd4 <- readRDS(paste0(FOLDER_RDS, "DMG/State_cd4.RDS"))
-genes_state_CD4 <- rownames(State_cd4)[State_cd4$adj.P.Val<0.05]
-
-fisher_test(intersect(g_cd4,universe_cd4), universe_cd4, intersect(genes_state_CD4,universe_cd4))
-
-
-State_cd8 <- readRDS(paste0(FOLDER_RDS, "DMG/State_cd8.RDS"))
-genes_state_CD8 <- rownames(State_cd8)[State_cd8$adj.P.Val<0.05]
-
-fisher_test(intersect(g_cd8,universe_cd8), universe_cd8, intersect(genes_state_CD8,universe_cd8))
-
-# Corroboration ####
-count_corroborated <- function(list_g, df_methyl, df_rna){
-  
-  #df_methyl <- df_methyl[df_methyl$P.Value<0.05 & abs(df_methyl$delta_beta)>0.05,]
-  #df_rna <- df_rna[df_rna$P.Value<0.05,]
-  
-  c <- 0
-  c_positive <- 0
-  
-  for (g in list_g){
-    
-    #select cpgs that are DMPs
-    cpg <- cpg_gene$cpg[cpg_gene$gene==g]
-    cpg <- intersect(cpg, rownames(df_methyl))
-    
-    cond_methyl <- length(cpg)>0 & (all(df_methyl[cpg,"logFC"]>0) | all(df_methyl[cpg,"logFC"]<0)) #all cpgs must go in same direction
-    cond_rna <- g %in% rownames(df_rna)
-    if (cond_methyl & cond_rna){
-      c <- c + 1
-      if (all(df_rna[g, "logFC"]*df_methyl[cpg, "logFC"]<0)){
-        c_positive <- c_positive + 1
-      }
-    }
-  }
-  
-  print(paste0(c_positive, "/", c))
-  return(list(c=c, c_positive=c_positive))
-}
-
-
-
-#CD4 HC
-out <- count_corroborated(g_cd4, CD4_3rd_1st_HP_methyl, CD4_3rd_1st_HP_rna)
-out <- count_corroborated(g_cd4, CD4_PP_3rd_HP_methyl, CD4_PP_3rd_HP_rna)
-
-#CD4 MS
-out <- count_corroborated(g_cd4, CD4_3rd_1st_MS_methyl, CD4_3rd_1st_MS_rna)
-out <- count_corroborated(g_cd4, CD4_PP_3rd_MS_methyl, CD4_PP_3rd_MS_rna)
-
-#CD8 HC
-out <- count_corroborated(g_cd8, CD8_3rd_1st_HP_methyl, CD8_3rd_1st_HP_rna)
-out <- count_corroborated(g_cd8, CD8_PP_3rd_HP_methyl, CD8_PP_3rd_HP_rna)
-
-#CD8 MS
-out <- count_corroborated(g_cd8, CD8_3rd_1st_MS_methyl, CD8_3rd_1st_MS_rna)
-out <- count_corroborated(g_cd8, CD8_PP_3rd_MS_methyl, CD8_PP_3rd_MS_rna)
-
-
-
-
-
-
-# Load Gilli ####
-
-genes_gilli <- read.table("data/genes_Gilli.txt")$V1
-
-
-sum(genes_gilli %in% rna_cd4_seed)
-sum(genes_gilli %in% rna_cd8_seed)
-sum(genes_gilli %in% methyl_cd4_seed)
-sum(genes_gilli %in% methyl_cd8_seed)
-
-sum(genes_gilli %in% diamond_rna_cd4)
-sum(genes_gilli %in% diamond_rna_cd8)
-sum(genes_gilli %in% diamond_methyl_cd4)
-sum(genes_gilli %in% diamond_methyl_cd8)
-
 
 
 
