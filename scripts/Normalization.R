@@ -1,23 +1,21 @@
-###############################################################################
-# Normalization with TMM
-###############################################################################
-
+# This script performs normalization and filtering of RNA-seq data
 # Created and modified by Alberto Zenere, 2021-04-11
 
-# 0.1 Setup
-# 0.2 Convert id
-# 0.3 Split CD4 and CD8
-# 0.4 Remove lowly expressed genes in CD4
-# 0.5 Remove lowly expressed genes in CD8
-# 0.6 Save
-# 1.1 Calculate TMM on CD4
-# 1.2 Calculate TMM on CD8
+# 3. Normalization with TMM ####
+
+# 3.1 Setup
+# 3.2 Convert id
+# 3.3 Split CD4 and CD8
+# 3.4 Remove lowly expressed genes in CD4
+# 3.5 Remove lowly expressed genes in CD8
+# 3.6 Save
+# 3.7 Calculate TMM on CD4
+# 3.8 Calculate TMM on CD8
 
 rm(list=ls()) # remove all entries in the global environment 
 
-################
-## 0.1 Setup  ##
-################
+
+# 3.1 Setup  ####
 
 #Set the virtual environment folder as R library
 pathlist <- .libPaths();
@@ -38,9 +36,8 @@ RDS_folder <- "RDS/"
 data_folder <- "data/"
 figure_folder <- "figures/"
 
-####################
-## 0.2 Convert id ##
-####################
+
+# 3.2 Convert id ####
 
 count <- readRDS(paste0(RDS_folder, "count_adjusted.RDS")) 
 metadata <- readRDS(paste0(RDS_folder, "metadata.RDS"))
@@ -82,9 +79,8 @@ p4 <- autoplot(count_pca, data = metadata, colour = 'State', size = 3)
 p1 + p2 + p3 + p4
 dev.off()
 
-###########################
-## 0.3 Split CD4 and CD8 ##  
-###########################
+
+# 3.3 Split CD4 and CD8 ####  
 
 #index
 idx_cd4 <- grep("CD4", metadata$Sample_Type)
@@ -99,9 +95,8 @@ count_cd4 <- count[,idx_cd4]
 metadata_cd4 <- metadata[idx_cd4,]
 metadata_cd4$Individual <- as.character(metadata_cd4$Individual)
 
-#############################################
-## 0.4 Remove lowly expressed genes in CD4 ##  
-#############################################
+
+# 3.4 Remove lowly expressed genes in CD4 #### 
 
 par(mar=c(1,1,1,1))
 dev.off()
@@ -127,9 +122,8 @@ for (n in 2:ncol(count_cd4)){
 
 dev.off()
 
-#############################################
-## 0.5 Remove lowly expressed genes in CD8 
-#############################################
+
+# 3.5 Remove lowly expressed genes in CD8 ####
 
 par(mar=c(1,1,1,1))
 dev.off()
@@ -155,9 +149,8 @@ for (n in 2:ncol(count_cd8)){
 
 dev.off()
 
-##############
-## 0.6 Save ##  
-##############
+
+# 3.6 Save #### 
 
 saveRDS(count_cd8, file = paste0(RDS_folder, "count_cd8.RDS"))
 saveRDS(metadata_cd8, file = paste0(RDS_folder, "metadata_cd8.RDS"))
@@ -165,9 +158,9 @@ saveRDS(metadata_cd8, file = paste0(RDS_folder, "metadata_cd8.RDS"))
 saveRDS(count_cd4, file = paste0(RDS_folder, "count_cd4.RDS"))
 saveRDS(metadata_cd4, file = paste0(RDS_folder, "metadata_cd4.RDS"))
 
-##############################
-## 1.1 Calculate TMM on CD4 ##  
-##############################
+
+# 3.7 Calculate TMM on CD4 ####  
+
 #TMM 
 count_cd4_tmm <- DGEList(count_cd4)
 count_cd4_tmm <- calcNormFactors(count_cd4_tmm, method="TMM")
@@ -176,9 +169,8 @@ count_cd4_tmm <- calcNormFactors(count_cd4_tmm, method="TMM")
 #save
 saveRDS(count_cd4_tmm, file = paste0(RDS_folder, "count_cd4_tmm.RDS"))
 
-##############################
-## 1.2 Calculate TMM on CD8 ##  
-##############################
+
+# 3.8 Calculate TMM on CD8 #### 
 
 #TMM 
 count_cd8_tmm <- DGEList(count_cd8)
