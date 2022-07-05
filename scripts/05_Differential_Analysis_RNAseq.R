@@ -1,4 +1,17 @@
-#Is there an overlap between the seed genes and the dynamic change (activated-resting) in RNAseq
+# This script performs differential analysis on RNA-seq 
+# Created and modified by Alberto Zenere, 2021-12-11
+
+# Differential analysis on RNA-seq data ####
+# 5.1 Set directory structure
+# 5.2 Load packages
+# 5.3 Load CD4 RNA-seq data
+# 5.4 Differential analysis on Resting CD4 samples
+# 5.5 Load CD8 RNA-seq data
+# 5.6 Differential analysis on Resting CD8 samples
+# 5.7 Save
+# 5.8 Differential analysis on Activated vs Resting CD4
+# 5.9 Differential analysis on Activated vs Resting CD8
+
 
 rm(list=ls()) # remove all entries in the global environment 
 
@@ -6,17 +19,17 @@ pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/graMS/Lib/R/library"
 .libPaths(newpath)
 
-# Set directory structure ------------------------------------------------------
+# 5.1 Set directory structure ####
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
+rna_folder <- "C:/Users/albze08/Desktop/phd/P4/RNAseq/RDS/"
 
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# Load packages ----------------------------------------------------------------
+# 5.2 Load packages ####
 
 pack_R <- c("limma","stringr","dplyr","tidyverse","pracma","ggrepel")
-
 for (i in 1:length(pack_R)) {
   library(pack_R[i], character.only = TRUE)
 }
@@ -29,12 +42,9 @@ library("gridExtra")
 
 set.seed(206)
 
+# 5.3 Load CD4 RNA-seq data ####
 
-# Load RNA-seq ####
-rna_folder <- "C:/Users/albze08/Desktop/phd/P4/RNAseq/RDS/"
-
-
-# CD4 ####
+# CD4 
 count_cd4 <- readRDS(file = paste0(rna_folder, "count_cd4_tmm.RDS"))
 
 metadata_cd4 <- readRDS(file = paste0(rna_folder, "metadata_cd4.RDS"))
@@ -45,7 +55,7 @@ is_P <- (!metadata_cd4$TimePoint %in% "Nonpregnant") %>% which()
 count_cd4 <- count_cd4[, is_P]
 metadata_cd4 <- metadata_cd4[is_P, ]
 
-# DE on Resting CD4 ####
+# 5.4 Differential analysis on Resting CD4 ####
 idx <- metadata_cd4$State=="Resting"
 count_cd4_resting <- count_cd4[,idx]
 metadata_cd4_resting <- metadata_cd4[idx,]
@@ -124,18 +134,8 @@ MS_3rd_2nd_cd4_all <- topTable(fit,adjust.method="none", p.value = Inf, number =
 HP_PP_2nd_cd4_all <- topTable(fit,adjust.method="none", p.value = Inf, number = Inf, coef="PP_Second_HP")
 MS_PP_2nd_cd4_all <- topTable(fit,adjust.method="none", p.value = Inf, number = Inf, coef="PP_Second_MS")
 
-#MSvsHP
-MSvsHP_cd4_1st <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="First")
-MSvsHP_cd4_2nd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Second")
-MSvsHP_cd4_3rd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Third")
-MSvsHP_cd4_PP <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="PP")
 
-MSvsHP_cd4_3rd_1st <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Third_First")
-MSvsHP_cd4_PP_3rd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="PP_Third")
-
-
-
-# CD8 ####
+# 5.5 load CD8 RNA-seq data ####
 count_cd8 <- readRDS(file = paste0(rna_folder, "count_cd8_tmm.RDS"))
 
 metadata_cd8 <- readRDS(file = paste0(rna_folder, "metadata_cd8.RDS"))
@@ -146,7 +146,7 @@ is_P <- (!metadata_cd8$TimePoint %in% "Nonpregnant") %>% which()
 count_cd8 <- count_cd8[, is_P]
 metadata_cd8 <- metadata_cd8[is_P, ]
 
-# DE on Resting ####
+# 5.6 Differential analysis on CD8 Resting samples ####
 idx <- metadata_cd8$State=="Resting"
 count_cd8_resting <- count_cd8[,idx]
 metadata_cd8_resting <- metadata_cd8[idx,]
@@ -185,7 +185,7 @@ fit <- contrasts.fit(fit, contrasts=contr_matrix)
 fit <- eBayes(fit)
 summary(decideTests(fit))
 
-# DEGs CD8 ####
+# DEGs CD8 
 #nominally DEG 3rd-1st
 HP_3rd_1st_cd8 <- topTable(fit,adjust.method="none", p.value = 0.05, number = Inf, coef="Third_HP")
 MS_3rd_1st_cd8 <- topTable(fit,adjust.method="none", p.value = 0.05, number = Inf, coef="Third_MS")
@@ -227,16 +227,7 @@ HP_PP_2nd_cd8_all <- topTable(fit,adjust.method="none", p.value = Inf, number = 
 MS_PP_2nd_cd8_all <- topTable(fit,adjust.method="none", p.value = Inf, number = Inf, coef="PP_Second_MS")
 
 
-#MSvsHP
-MSvsHP_cd8_1st <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="First")
-MSvsHP_cd8_2nd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Second")
-MSvsHP_cd8_3rd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Third")
-MSvsHP_cd8_PP <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="PP")
-
-MSvsHP_cd8_3rd_1st <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="Third_First")
-MSvsHP_cd8_PP_3rd <- topTable(fit,adjust.method="BH", p.value = Inf, number = Inf, coef="PP_Third")
-
-# Save ####
+# 5.7 Save ####
 #rebound CD4
 saveRDS(HP_3rd_1st_cd4, paste0(FOLDER_RDS, "DMG/CD4_3rd_HP_rna.RDS"))
 saveRDS(HP_PP_3rd_cd4, paste0(FOLDER_RDS, "DMG/CD4_PP_HP_rna.RDS"))
@@ -313,18 +304,9 @@ saveRDS(MS_3rd_2nd_cd8, paste0(FOLDER_RDS, "DMG/CD8_3rd_2nd_MS_rna.RDS"))
 saveRDS(HP_PP_2nd_cd8, paste0(FOLDER_RDS, "DMG/CD8_PP_2nd_HP_rna.RDS"))
 saveRDS(MS_PP_2nd_cd8, paste0(FOLDER_RDS, "DMG/CD8_PP_2nd_MS_rna.RDS"))
 
-#MSvsHP
-saveRDS(MSvsHP_cd8_1st, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_1st.RDS"))
-saveRDS(MSvsHP_cd8_2nd, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_2nd.RDS"))
-saveRDS(MSvsHP_cd8_3rd, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_3rd.RDS"))
-saveRDS(MSvsHP_cd8_PP, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_PP.RDS"))
-
-saveRDS(MSvsHP_cd8_3rd_1st, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_3rd_1st.RDS"))
-saveRDS(MSvsHP_cd8_PP_3rd, paste0(FOLDER_RDS, "DMG/MSvsHP_cd8_PP_3rd.RDS"))
 
 
-
-# DE on Activated vs Resting CD4 ####
+# 5.8 Differential analysis on Activated vs Resting CD4 ####
 design <- model.matrix(~ Sample_Group + State + Activation + 
                          Proportions_Memory + Cell_Viability + Age, metadata_cd4 )
 
@@ -339,11 +321,8 @@ summary(decideTests(fit))
 State_cd4 <- topTable(fit,adjust.method="none", p.value = Inf, number = Inf, coef="StateResting")
 saveRDS(State_cd4, paste0(FOLDER_RDS, "DMG/State_cd4.RDS"))
 
-sum(State_cd4$P.Value<0.05)/nrow(State_cd4)
 
-
-
-# DE on Activated vs Resting CD8 ####
+# 5.9 Differential analysis on Activated vs Resting CD8 ####
 design <- model.matrix(~ Sample_Group + State + Activation + 
                          Proportions_Memory + Cell_Viability + Age, metadata_cd8 )
 
@@ -358,4 +337,3 @@ summary(decideTests(fit))
 State_cd8 <- topTable(fit,adjust.method="none", p.value = Inf, number = Inf, coef="StateResting")
 saveRDS(State_cd8, paste0(FOLDER_RDS, "DMG/State_cd8.RDS"))
 
-sum(State_cd8$P.Value<0.05)/nrow(State_cd8)
