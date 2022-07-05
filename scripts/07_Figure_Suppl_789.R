@@ -1,6 +1,21 @@
+# This script generates figures S.7-8-9
+# Created and modified by Alberto Zenere, 2021-2-12
 
+# Supplementary figures 7,8,9 ####
+# 7.1 Setup
+# 7.2 Load differential analysis results
+# 7.3 Correlation plots 2nd-1st vs 3rd-1st
+# 7.4 Correlation plots 3rd-2nd vs 3rd-1st
+# 7.5 Correlation plots PP-2nd vs 2nd-1st
+# 7.6 Figure on number of DMPs and DEGs
+# 7.7 Figure on overlap between 2nd-1st, 3rd-1st, 3rd-2nd and PP-3rd, PP-2nd
+
+
+
+
+
+# 7.1 Setup ####
 rm(list=ls()) # remove all entries in the global environment 
-
 
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/P3/Lib/R/library"
@@ -15,17 +30,17 @@ require("lumi")
 require("pracma")
 require("ggpubr")
 
-# Set directory structure ####
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# My functions ####
+# My functions 
 source('probe_to_gene.R')
 source('fisher_test.R')
 
-# Load ####
+# 7.2 Load differential analysis results ####
 #CD4 methylation
 CD4_2nd_1st_HP_methyl <- readRDS("RDS_files/DMR/CD4_2nd_1st_HP_all.RDS")
 CD4_2nd_1st_MS_methyl <- readRDS("RDS_files/DMR/CD4_2nd_1st_MS_all.RDS")
@@ -86,7 +101,7 @@ list_cd4_rna <- rownames(CD4_2nd_1st_HP_rna)
 list_cd8_rna <- rownames(CD8_2nd_1st_HP_rna)
 
 
-# Correlation plots  2nd-1st vs 3rd-1st ####
+# 7.3 Correlation plots 2nd-1st vs 3rd-1st ####
 pdf("figures_manus/Correlations_Suppl.pdf", width=10)
 
 par(mfrow=c(2,4))
@@ -147,7 +162,7 @@ legend("topright", legend = paste0("r = ", round(100*cor(CD8_3rd_1st_MS_methyl$l
 dev.off()
 
 
-# Correlation plots  3rd-2nd vs 3rd-1st ####
+# 7.4 Correlation plots 3rd-2nd vs 3rd-1st ####
 pdf("figures_manus/Correlations_Suppl_2.pdf", width=12)
 
 par(mfrow=c(2,4))
@@ -203,13 +218,10 @@ smoothScatter(CD8_3rd_1st_MS_methyl$logFC ~ CD8_3rd_2nd_MS_methyl$logFC, pch=16,
               colramp = colorRampPalette(c("white", "cornflowerblue", "moccasin", "lightsalmon", "tomato", "red", "darkred")))
 legend("topright", legend = paste0("r = ", round(100*cor(CD8_3rd_1st_MS_methyl$logFC, CD8_3rd_2nd_MS_methyl$logFC))/100))
 
-
-
 dev.off()
 
 
-
-# Correlation plots  PP-2nd vs 2nd-1st ####
+# 7.5 Correlation plots PP-2nd vs 2nd-1st ####
 pdf("figures_manus/Correlations_Suppl_3.pdf", width=12)
 
 par(mfrow=c(2,4))
@@ -237,7 +249,6 @@ smoothScatter(CD8_PP_2nd_HP_methyl$logFC ~ CD8_2nd_1st_HP_methyl$logFC, pch=16, 
               ylab = "PP-2nd", xlab = "2nd-1st", cex.axis = 1.5, cex.lab = 1.5,
               colramp = colorRampPalette(c("white", "cornflowerblue", "moccasin", "lightsalmon", "tomato", "red", "darkred")))
 legend("topright", legend = paste0("r = ", round(100*cor(CD8_PP_2nd_HP_methyl$logFC, CD8_2nd_1st_HP_methyl$logFC))/100))
-
 
 
 
@@ -270,7 +281,7 @@ legend("topright", legend = paste0("r = ", round(100*cor(CD8_PP_2nd_MS_methyl$lo
 dev.off()
 
 
-#Second figure: DMPs and DEGs ####
+# 7.6 Figure on number of DMPs and DEGs ####
 
 #CD4 methylation
 CD4_2nd_1st_HP_methyl <- readRDS("RDS_files/DMR/CD4_2nd_1st_HP.RDS")
@@ -387,7 +398,7 @@ ggarrange(p1,p2,p3, nrow=1, ncol=3)
 dev.off()
 
 
-# Plot overlap ####
+# 7.7 Figure on overlap between 2nd-1st, 3rd-1st, 3rd-2nd and PP-3rd, PP-2nd ####
 #CD4 HC RNA
 overlap_2nd_1st_rna_hp_cd4 <- fisher_test(rownames(CD4_2nd_1st_HP_rna), list_cd4_rna, rownames(CD4_PP_2nd_HP_rna))
 overlap_3rd_2nd_rna_hp_cd4 <- fisher_test(rownames(CD4_3rd_2nd_HP_rna), list_cd4_rna, rownames(CD4_PP_3rd_HP_rna))
