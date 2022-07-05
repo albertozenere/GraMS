@@ -1,5 +1,17 @@
-#Is there an overlap between the seed genes and the dynamic change (activated-resting) in RNAseq
+# This script performs differential analysis of methylation data
+# Created and modified by Alberto Zenere, 2021-10-11
 
+
+# Differential analysis on methylation data ####
+# 4.1 Set directory structure
+# 4.2 Load packages
+# 4.3 Read in files
+# 4.4 Gather beta and delta beta values
+# 4.5 Differential analysis on CD4
+# 4.6 Gather DMPs CD4
+# 4.7 Differential analysis on CD8
+# 4.8 Gather DMPs CD8
+# 4.9 Save
 
 rm(list=ls()) # remove all entries in the global environment 
 
@@ -7,14 +19,14 @@ pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/graMS/Lib/R/library"
 .libPaths(newpath)
 
-# Set directory structure ------------------------------------------------------
+# 4.1 Set directory structure ####
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# Load packages ----------------------------------------------------------------
+# 4.2 Load packages ####
 
 pack_R <- c("limma","stringr","dplyr","tidyverse","pracma","ggrepel")
 
@@ -31,7 +43,7 @@ library("gridExtra")
 set.seed(206)
 
 
-# Read in files
+# 4.3 Read in files ####
 methyl_raw <- readRDS(file = paste0(FOLDER_RDS, "TH2636_methyl_raw_211123.RDS"))
 methyl_combat <- readRDS(file = paste0(FOLDER_RDS, "TH2636_methyl_combat_211123.RDS"))
 ProbeFeatures <- readRDS(file=paste0(FOLDER_RDS, "TH2636_ProbeFeatures_211123.RDS"))
@@ -126,7 +138,7 @@ methyl_BP_CD8 <- cbind(methyl_NP_CD8, methyl_CD8[,is_before])
 pheno_BP_CD8 <- rbind(pheno_NP_CD8, pheno_CD8[is_before,])
 
 
-# Gather beta and delta beta values ####
+# 4.4 Gather beta and delta beta values ####
 gather_mean_beta <- function(count,meta){
   #beta
   cpg_1st <- count[, meta$TimePoint=="1st"] %>% rowMeans()
@@ -176,16 +188,14 @@ delta_base_beta_CD4_MS <- gather_mean_beta(methyl_CD4_MS, pheno_CD4_MS)[[3]]
 delta_base_beta_CD8_HP <- gather_mean_beta(methyl_CD8_HP, pheno_CD8_HP)[[3]]
 delta_base_beta_CD8_MS <- gather_mean_beta(methyl_CD8_MS, pheno_CD8_MS)[[3]]
 
-# Limma on CD4 ####
+# 4.5 Differential analysis on CD4 ####
 M_CD4 <- beta2m(methyl_CD4)
 
 pheno_CD4$Sample_Group <- gsub("MS_BP", "AA", pheno_CD4$Sample_Group) #to make sure it is discarded below
 design_CD4 <- model.matrix(~ Sample_Group + Age + Proportions_Memory + Cell_Viability, pheno_CD4 )
 pheno_CD4$Sample_Group <- gsub("AA", "MS_BP", pheno_CD4$Sample_Group)
 
-# corfit <- duplicateCorrelation(M_CD4, design_CD4, block=pheno_CD4$Individual) #block the individual effect
-# saveRDS(corfit, file=paste0(FOLDER_RDS, "DMG/MSvsHP/seed/CD4_corfit.RDS"))
-corfit <- readRDS(paste0(FOLDER_RDS, "DMG/MSvsHP/seed/CD4_corfit.RDS"))
+corfit <- duplicateCorrelation(M_CD4, design_CD4, block=pheno_CD4$Individual) #block the individual effect
 
 contr_matrix <- limma::makeContrasts(First = Sample_GroupMS_1st_CD4 - Sample_GroupHP_1st_CD4 ,
                                      Second = Sample_GroupMS_2nd_CD4 - Sample_GroupHP_2nd_CD4,
@@ -215,7 +225,7 @@ fit_CD4 <- contrasts.fit(fit_CD4, contr_matrix)
 fit_CD4 <- eBayes(fit_CD4)
 summary(decideTests(fit_CD4))
 
-#Gather DMPs CD4 ####
+# 4.6 Gather DMPs CD4 ####
 THS <- 0.05
 CD4_3rd <- topTable(fit_CD4, p.value=Inf, lfc=0, number = "inf", coef = "Third_HP")
 CD4_3rd <- CD4_3rd[rownames(methyl_CD4),]
@@ -299,27 +309,14 @@ CD4_PP_2nd <- topTable(fit_CD4, p.value=Inf, lfc=0, number = "inf", coef = "PP_S
 CD4_PP_2nd_MS_all <- CD4_PP_2nd[rownames(methyl_CD4),]
 
 
-
-#MS vs HP
-MSvsHP_cd4_1st <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="First")
-MSvsHP_cd4_2nd <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="Second")
-MSvsHP_cd4_3rd <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="Third")
-MSvsHP_cd4_PP <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="PP")
-
-MSvsHP_cd4_3rd_1st <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="Third_First")
-MSvsHP_cd4_PP_3rd <- topTable(fit_CD4,adjust.method="BH", p.value = Inf, number = Inf, coef="PP_Third")
-
-
-# Limma on CD8 ####
+# 4.7 Differential analysis on CD8 ####
 M_CD8 <- beta2m(methyl_CD8)
 
 pheno_CD8$Sample_Group <- gsub("MS_BP", "AA", pheno_CD8$Sample_Group) #to make sure it is discarded below
 design_CD8 <- model.matrix(~ Sample_Group + Age + Proportions_Memory + Cell_Viability, pheno_CD8 )
 pheno_CD8$Sample_Group <- gsub("AA", "MS_BP", pheno_CD8$Sample_Group)
 
-# corfit <- duplicateCorrelation(M_CD8, design_CD8, block=pheno_CD8$Individual) #block the individual effect
-# saveRDS(corfit, file=paste0(FOLDER_RDS, "DMG/MSvsHP/seed/CD8_corfit.RDS"))
-corfit <- readRDS(paste0(FOLDER_RDS, "DMG/MSvsHP/seed/CD8_corfit.RDS"))
+corfit <- duplicateCorrelation(M_CD8, design_CD8, block=pheno_CD8$Individual) #block the individual effect
 
 contr_matrix <- limma::makeContrasts(First = Sample_GroupMS_1st_CD8 - Sample_GroupHP_1st_CD8 ,
                                      Second = Sample_GroupMS_2nd_CD8 - Sample_GroupHP_2nd_CD8,
@@ -349,7 +346,7 @@ fit_CD8 <- contrasts.fit(fit_CD8, contr_matrix)
 fit_CD8 <- eBayes(fit_CD8)
 summary(decideTests(fit_CD8))
 
-# Gather DMPs CD8 ####
+# 4.8 Gather DMPs CD8 ####
 CD8_3rd <- topTable(fit_CD8, p.value=Inf, lfc=0, number = "inf", coef = "Third_HP")
 CD8_3rd <- CD8_3rd[rownames(methyl_CD8),]
 CD8_3rd_HP <- CD8_3rd[(CD8_3rd$P.Value<0.05) & abs(delta_base_beta_CD8_HP[,"3rd_1st"])>THS,] 
@@ -393,7 +390,7 @@ CD8_PP_2nd <- topTable(fit_CD8, p.value=Inf, lfc=0, number = "inf", coef = "PP_S
 CD8_PP_2nd <- CD8_PP_2nd[rownames(methyl_CD8),]
 CD8_PP_2nd_MS <- CD8_PP_2nd[(CD8_PP_2nd$P.Value<0.05) & abs(delta_beta_CD8_MS[,"PP_2nd"])>THS,] 
 
-# Gather all cpgs CD8 ####
+# Gather all cpgs CD8 
 CD8_3rd_HP_all <- topTable(fit_CD8, p.value=Inf, lfc=0, number = "inf", coef = "Third_HP")
 CD8_3rd_HP_all <- CD8_3rd_HP_all[rownames(methyl_CD8),]
 CD8_3rd_HP_all$delta_beta <- delta_base_beta_CD8_HP[,"3rd_1st"]
@@ -432,16 +429,8 @@ CD8_PP_2nd_HP_all <- CD8_PP_2nd[rownames(methyl_CD8),]
 CD8_PP_2nd <- topTable(fit_CD8, p.value=Inf, lfc=0, number = "inf", coef = "PP_Second_MS")
 CD8_PP_2nd_MS_all <- CD8_PP_2nd[rownames(methyl_CD8),]
 
-#MSvsHP
-MSvsHP_cd8_1st <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="First")
-MSvsHP_cd8_2nd <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="Second")
-MSvsHP_cd8_3rd <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="Third")
-MSvsHP_cd8_PP <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="PP")
 
-MSvsHP_cd8_3rd_1st <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="Third_First")
-MSvsHP_cd8_PP_3rd <- topTable(fit_CD8,adjust.method="BH", p.value = Inf, number = Inf, coef="PP_Third")
-
-# Save ####
+# 4.9 Save ####
 #CD4 DMP
 saveRDS(CD4_3rd_HP, paste0(FOLDER_RDS, "DMR/CD4_3rd_HP_methyl.RDS"))
 saveRDS(CD4_PP_HP, paste0(FOLDER_RDS, "DMR/CD4_PP_HP_methyl.RDS"))
@@ -494,20 +483,7 @@ saveRDS(CD8_3rd_2nd_MS_all, paste0(FOLDER_RDS, "DMR/CD8_3rd_2nd_MS_all.RDS"))
 saveRDS(CD8_PP_2nd_HP_all, paste0(FOLDER_RDS, "DMR/CD8_PP_2nd_HP_all.RDS"))
 saveRDS(CD8_PP_2nd_MS_all, paste0(FOLDER_RDS, "DMR/CD8_PP_2nd_MS_all.RDS"))
 
-#MS vs HP
-saveRDS(MSvsHP_cd4_1st, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_1st.RDS"))
-saveRDS(MSvsHP_cd4_2nd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_2nd.RDS"))
-saveRDS(MSvsHP_cd4_3rd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_3rd.RDS"))
-saveRDS(MSvsHP_cd4_PP, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_PP.RDS"))
-saveRDS(MSvsHP_cd4_3rd_1st, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_3rd_1st.RDS"))
-saveRDS(MSvsHP_cd4_PP_3rd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD4_PP_3rd.RDS"))
 
-saveRDS(MSvsHP_cd8_1st, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_1st.RDS"))
-saveRDS(MSvsHP_cd8_2nd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_2nd.RDS"))
-saveRDS(MSvsHP_cd8_3rd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_3rd.RDS"))
-saveRDS(MSvsHP_cd8_PP, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_PP.RDS"))
-saveRDS(MSvsHP_cd8_3rd_1st, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_3rd_1st.RDS"))
-saveRDS(MSvsHP_cd8_PP_3rd, paste0(FOLDER_RDS, "DMR/MSvsHP_CD8_PP_3rd.RDS"))
 
 
 
