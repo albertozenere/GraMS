@@ -1,9 +1,8 @@
-###############################################################################
-# 1_Differential methylation analysis using ChAMP
-###############################################################################
-
+# This script contains the pre-processing of the methylation data
 # Tutorial: David Martinez-Enguita (2020) and https://www.bioconductor.org/packages/release/bioc/vignettes/ChAMP/inst/doc/ChAMP.html
 # Created and modified by Sandra Hellberg, 2021-08-13
+
+# 1_Differential methylation analysis using ChAMP ####
 
 # 1.1 Importation of methylation raw idat files
 # 1.2 Quality control and exploratory analysis
@@ -29,9 +28,7 @@ set.seed(541)
 setwd("P:/LiU/Postdok/Projekt/GraMS/Methylation/TH-2636")
 main_dir <- "P:/LiU/Postdok/Projekt/GraMS/Methylation/TH-2636"
 
-##############################################################################
-# 1.1 Importation of methylation files
-##############################################################################
+# 1.1 Importation of methylation files ####
 
 # Data set ID, data tag 
 array_type <- "EPIC"
@@ -60,9 +57,8 @@ saveRDS(methyl_raw, file = paste0(main_dir, "/Results/RDS_files/Methylation_file
 methyl_raw <- readRDS(file = paste0(main_dir, "/Results/RDS_files/Methylation_files/", 
                                     dset_name, "_methyl_raw.RDS"))
 
-##############################################################################
-# 1.2 Quality control and exploratory analysis
-##############################################################################
+
+# 1.2 Quality control and exploratory analysis ####
 
 # QC plot, mds plot, density plot, dendrogram
 champ.QC(beta        = methyl_raw$beta, 
@@ -78,9 +74,8 @@ champ.QC(beta        = methyl_raw$beta,
 
 mdsPlot(methyl_raw$beta, sampNames = methyl_raw$pd$Sample_Type)
 
-##############################################################################
-# 1.3 Normalization
-##############################################################################
+
+# 1.3 Normalization ####
 
 # Normalization (BMIQ: Beta-Mixture Quantile method from Teschendorff et al. Bioinformatics, 2013
 methyl_norm <- champ.norm(beta       = methyl_raw$beta, 
@@ -99,9 +94,8 @@ saveRDS(methyl_norm, file = paste0(main_dir, "/Results/RDS_files/Methylation_fil
 methyl_norm <- readRDS(file = paste0(main_dir, "/Results/RDS_files/Methylation_files/", 
                                      dset_name, "_methyl_norm.RDS"))
 
-##############################################################################
-# 1.4 Singular value decomposition
-##############################################################################
+
+# 1.4 Singular value decomposition ####
 
 # Singular Value Decomposition (SVD) analysis for batch effects prediction
 # Heatmaps: darker colors indicate stronger correlation of SVD component
@@ -127,9 +121,8 @@ champ.SVD(beta       = methyl_norm,
           resultsDir = paste0(main_dir, "/Figures"))
 
 
-#####################################################################
-# 1.5 Batch effect correction                                       #
-#####################################################################
+
+# 1.5 Batch effect correction  ####
 
 # If Batch is detected, run champ.runCombat()
 methyl_combat <- champ.runCombat(beta      = methyl_norm,
