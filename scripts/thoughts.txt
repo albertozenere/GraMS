@@ -1,0 +1,7 @@
+pro-inflammatory -> th1
+carbs -> glucose -> inflammation
+obesity <-> insulin resistance -> pro-inflammatory -> inflammation
+progesterone -> !th1 & th2
+progesterone -> hyperinsulinemia, increases glycogen ketones, reduces gluconeogenesis
+leptin -> th1 & !th2
+gestational diabetes -> higher % MS
