@@ -1,18 +1,33 @@
+# This script generates figure 5 (comparison of MS and HC)
+# Created and modified by Alberto Zenere, 2021-01-9
 
+# 09_Figure_5 ####
+# 9.1 Setup
+# 9.2 Load MS-associated genes
+# 9.3 Load DEGs and DMPs
+# 9.4 Select rebound cpgs and genes for CD8
+# 9.5 Plot for CD8
+# 9.6 Select rebound cpgs and genes for CD4
+# 9.7 Plot for CD4
+# 9.8 Enrichment of Activation
+# 9.9 Create list CD8 methylation with stricter threshold
+# 9.10 MS enrichment on genes that rebound in MS but not HC
+
+# 9.1 Setup ####
 rm(list=ls()) # remove all entries in the global environment 
 
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/graMS/Lib/R/library"
 .libPaths(newpath)
 
-# Set directory structure ------------------------------------------------------
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# Load packages ----------------------------------------------------------------
+# Load packages 
 
 pack_R <- c("limma","stringr","dplyr","tidyverse","pracma","ggrepel")
 
@@ -30,13 +45,13 @@ library("ggvenn")
 
 set.seed(206)
 
-# My functions ####
+# My functions 
 source('probe_to_gene.R')
 source('fisher_test.R')
 source('fisher_test_less.R')
 
 
-#MS-associated genes ####
+# 9.2 Load MS-associated genes ####
 # Load DisGeNET
 disgenet <- read.csv("data/MS_DisGeNET.txt", sep = "\t")
 disgenet_genes <- disgenet$geneSymbol %>% unique()
@@ -48,7 +63,7 @@ science_genes <- unique(science_genes$SYMBOL)
 #combine
 MS_genes <- union(disgenet_genes, science_genes)
 
-# DEGs and DMPs ####
+# 9.3 Load DEGs and DMPs ####
 #CD4 RNA
 CD4_3rd_HP_rna <- readRDS("RDS_files/DMG/CD4_3rd_HP_rna_all.RDS")
 CD4_PP_HP_rna <- readRDS("RDS_files/DMG/CD4_PP_HP_rna_all.RDS")
@@ -79,19 +94,6 @@ CD8_PP_HP_methyl <- readRDS("RDS_files/DMR/CD8_PP_HP_methyl_all.RDS")
 CD8_3rd_MS_methyl <- readRDS("RDS_files/DMR/CD8_3rd_MS_methyl_all.RDS")
 CD8_PP_MS_methyl <- readRDS("RDS_files/DMR/CD8_PP_MS_methyl_all.RDS")
 
-#MS vs HP
-CD4_3rd_1st_MSvsHP_rna <- readRDS("RDS_files/DMG/MSvsHP_cd4_3rd_1st.RDS")
-CD8_3rd_1st_MSvsHP_rna <- readRDS("RDS_files/DMG/MSvsHP_cd8_3rd_1st.RDS")
-
-CD4_PP_3rd_MSvsHP_rna <- readRDS("RDS_files/DMG/MSvsHP_cd4_PP_3rd.RDS")
-CD8_PP_3rd_MSvsHP_rna <- readRDS("RDS_files/DMG/MSvsHP_cd8_PP_3rd.RDS")
-
-CD4_3rd_1st_MSvsHP_methyl <- readRDS("RDS_files/DMR/MSvsHP_cd4_3rd_1st.RDS")
-CD8_3rd_1st_MSvsHP_methyl <- readRDS("RDS_files/DMR/MSvsHP_cd8_3rd_1st.RDS")
-
-CD4_PP_3rd_MSvsHP_methyl <- readRDS("RDS_files/DMR/MSvsHP_cd4_PP_3rd.RDS")
-CD8_PP_3rd_MSvsHP_methyl <- readRDS("RDS_files/DMR/MSvsHP_cd8_PP_3rd.RDS")
-
 
 # Re-order ####
 list_cd4_rna <- rownames(CD4_3rd_HP_rna)
@@ -116,20 +118,8 @@ CD8_PP_HP_methyl <- CD8_PP_HP_methyl[list_cd8_methyl,]
 CD8_3rd_MS_methyl <- CD8_3rd_MS_methyl[list_cd8_methyl,]
 CD8_PP_MS_methyl <- CD8_PP_MS_methyl[list_cd8_methyl,]
 
-CD4_3rd_1st_MSvsHP_methyl <- CD4_3rd_1st_MSvsHP_methyl[list_cd4_methyl,]
-CD4_PP_3rd_MSvsHP_methyl <- CD4_PP_3rd_MSvsHP_methyl[list_cd4_methyl,]
 
-CD8_3rd_1st_MSvsHP_methyl <- CD8_3rd_1st_MSvsHP_methyl[list_cd8_methyl,]
-CD8_PP_3rd_MSvsHP_methyl <- CD8_PP_3rd_MSvsHP_methyl[list_cd8_methyl,]
-
-CD4_3rd_1st_MSvsHP_rna <- CD4_3rd_1st_MSvsHP_rna[list_cd4_rna,]
-CD4_PP_3rd_MSvsHP_rna <- CD4_PP_3rd_MSvsHP_rna[list_cd4_rna,]
-
-CD8_3rd_1st_MSvsHP_rna <- CD8_3rd_1st_MSvsHP_rna[list_cd8_rna,]
-CD8_PP_3rd_MSvsHP_rna <- CD8_PP_3rd_MSvsHP_rna[list_cd8_rna,]
-
-
-#Rebound ####
+# 9.4 Select rebound cpgs and genes for CD8 ####
 
 #RNA
 rebound_gene_cd8_hp <- intersect(rownames(CD8_3rd_HP_rna)[CD8_3rd_HP_rna$P.Value<0.05],
@@ -151,7 +141,7 @@ rebound_cpg_cd8_ms <- intersect(rownames(CD8_3rd_MS_methyl)[CD8_3rd_MS_methyl$P.
 rebound_cpg_cd8 <- union(rebound_cpg_cd8_hp, rebound_cpg_cd8_ms)
 rebound_cpg_cd8_gene <- probe_to_gene(rebound_cpg_cd8)$gene
 
-# Plot ####
+# 9.5 Plot for CD8 ####
 
 plot_logFC_vs_logFC <- function(v1, v2, gene_list=NULL){
   
@@ -229,7 +219,7 @@ p_PP_methyl_CD8 <- plot_logFC_vs_logFC(CD8_PP_HP_methyl[rebound_cpg_cd8, "logFC"
   ggtitle("Methylation: PP-3rd") 
 
 
-#Rebound CD4 ####
+# 9.6 Select rebound cpgs and genes for CD4 ####
 
 #RNA
 rebound_gene_cd4_hp <- intersect(rownames(CD4_3rd_HP_rna)[CD4_3rd_HP_rna$P.Value<0.05],
@@ -252,7 +242,8 @@ rebound_cpg_cd4 <- union(rebound_cpg_cd4_hp, rebound_cpg_cd4_ms)
 rebound_cpg_cd4_gene <- probe_to_gene(rebound_cpg_cd4)$gene
 
 
-# Plot CD4 ####
+# 9.7 Plot for CD8 ####
+
 p_3rd_rna_CD4 <- plot_logFC_vs_logFC(CD4_3rd_HP_rna[rebound_gene_cd4, "logFC"], CD4_3rd_MS_rna[rebound_gene_cd4, "logFC"], rebound_gene_cd4) +
   ggtitle("RNA-seq: 3rd-1st") 
 p_PP_rna_CD4 <- plot_logFC_vs_logFC(CD4_PP_HP_rna[rebound_gene_cd4, "logFC"], CD4_PP_MS_rna[rebound_gene_cd4, "logFC"], rebound_gene_cd4) +
@@ -263,7 +254,6 @@ p_3rd_methyl_CD4 <- plot_logFC_vs_logFC(CD4_3rd_HP_methyl[rebound_cpg_cd4, "logF
 p_PP_methyl_CD4 <- plot_logFC_vs_logFC(CD4_PP_HP_methyl[rebound_cpg_cd4, "logFC"], CD4_PP_MS_methyl[rebound_cpg_cd4, "logFC"], rebound_cpg_cd4_gene) +
   ggtitle("Methylation: PP-3rd") 
 
-#tiff("tmp.tiff", height=500, width=1000)
 pdf("figures_manus/MSvsHP.pdf", width=14)
 ggarrange(p_3rd_methyl_CD4, p_PP_methyl_CD4, p_3rd_methyl_CD8, p_PP_methyl_CD8,
           p_3rd_rna_CD4, p_PP_rna_CD4, p_3rd_rna_CD8, p_PP_rna_CD8, nrow=2, ncol=4)
@@ -295,18 +285,6 @@ fisher_cd4_methyl <- fisher_test(cpg_rebound_common_cd4_gene, universe_methyl, i
 
 
 #CD8 methyl
-# rebound_cpg_cd8_hp <- intersect(rownames(CD8_3rd_HP_methyl)[CD8_3rd_HP_methyl$P.Value<0.05 & abs(CD8_3rd_HP_methyl$delta_beta)>0.1],
-#                                 rownames(CD8_PP_HP_methyl)[CD8_PP_HP_methyl$P.Value<0.05 & abs(CD8_PP_HP_methyl$delta_beta)>0.1])
-# 
-# rebound_cpg_cd8_ms <- intersect(rownames(CD8_3rd_MS_methyl)[CD8_3rd_MS_methyl$P.Value<0.05 & abs(CD8_3rd_MS_methyl$delta_beta)>0.05],
-#                                 rownames(CD8_PP_MS_methyl)[CD8_PP_MS_methyl$P.Value<0.05 & abs(CD8_PP_MS_methyl$delta_beta)>0.05])
-# 
-# rebound_cpg_cd8 <- union(rebound_cpg_cd8_hp, rebound_cpg_cd8_ms)
-# cpg_rebound_common_cd8 <- list_cd8_methyl[ (CD8_3rd_HP_methyl$logFC*CD8_3rd_MS_methyl$logFC>0) &
-#                                              abs(CD8_3rd_HP_methyl$delta_beta)>0.1 &
-#                                              (CD8_PP_HP_methyl$logFC*CD8_PP_MS_methyl$logFC>0) &
-#                                              abs(CD8_PP_HP_methyl$delta_beta)>0.1] %>% intersect(rebound_cpg_cd8)
-
 cpg_rebound_common_cd8 <- list_cd8_methyl[ (CD8_3rd_HP_methyl$logFC*CD8_3rd_MS_methyl$logFC>0) &
                                              (CD8_PP_HP_methyl$logFC*CD8_PP_MS_methyl$logFC>0)] %>% intersect(rebound_cpg_cd8)
 
@@ -345,7 +323,7 @@ write.table(cpg_rebound_common_cd8_gene, "cpg_rebound_common_cd8_gene.txt", row.
 
 
 
-#Enrichment of Activation ####
+# 9.8 Enrichment of Activation ####
 State_cd4 <- readRDS(paste0(FOLDER_RDS, "DMG/State_cd4.RDS"))
 genes_state_CD4 <- rownames(State_cd4)[State_cd4$adj.P.Val<0.05]
 
@@ -369,8 +347,7 @@ dev.off()
 
 
 
-
-#list CD8 methylation with stricter threshold
+# 9.9 Create list CD8 methylation with stricter threshold #####
 rebound_cpg_cd8_hp <- intersect(rownames(CD8_3rd_HP_methyl)[CD8_3rd_HP_methyl$P.Value<0.05 & abs(CD8_3rd_HP_methyl$delta_beta)>0.1],
                                 rownames(CD8_PP_HP_methyl)[CD8_PP_HP_methyl$P.Value<0.05 & abs(CD8_PP_HP_methyl$delta_beta)>0.1])
 
@@ -389,7 +366,7 @@ write.table(cpg_rebound_common_cd8_gene, "cpg_rebound_common_cd8_gene_01.txt", r
 
 
 
-# Genes that rebound in MS but not HC ####
+# 9.10 MS enrichment on genes that rebound in MS but not HC ####
 #Methyl CD4
 rebound_cpg_cd4_ms <- intersect(rownames(CD4_3rd_MS_methyl)[CD4_3rd_MS_methyl$P.Value<0.05 & abs(CD4_3rd_MS_methyl$delta_beta)>0.05],
                                 rownames(CD4_PP_MS_methyl)[CD4_PP_MS_methyl$P.Value<0.05 & abs(CD4_PP_MS_methyl$delta_beta)>0.05])
