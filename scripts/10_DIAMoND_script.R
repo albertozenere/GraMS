@@ -1,7 +1,20 @@
+# This script generates the module genes
+# Created and modified by Alberto Zenere, 2022-01-20
 
+# 10_DIAMoND_script ####
+# 10.1 Setup
+# 10.2 Import and format input files
+# 10.3 Function to run DIAMoND
+# 10.4 Module Inference
+# 10.5 Load universe files
+# 10.6 Enrichment of MS-associated genes
+# 10.7 Overlap between modules
+# 10.8 Plot enrichment
+
+# 10.1 Setup ####
 rm(list=ls()) # remove all entries in the global environment 
 
-# Set R library ####
+# Set R library 
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/P3/Lib/R/library"
 .libPaths(newpath)
@@ -19,55 +32,30 @@ py_config() #this tells you which python installation reticulate (used by modifi
 
 mart <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
 
-# Set directory structure ####
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
+# My functions 
+#Do the hypergeometric test on new list
+source("hyge_test_2.R")
+source("fisher_test.R")
 
-# Import and format input files ####
+# 10.2 Import and format input files ####
+#Load DisGeNET
 disgenet <- read.csv("data/MS_DisGeNET.txt", sep = "\t")
 disgenet_genes <- disgenet$geneSymbol %>% unique()
 
 science_genes <- read.csv(file = "C:/Users/albze08/Desktop/phd/P4/RNAseq/data/complete_MS_annotation_p10e-6.csv")
 science_genes <- unique(science_genes$SYMBOL)
 
-
-# My functions ####
-#Do the hypergeometric test on new list
-source("hyge_test_2.R")
-source("fisher_test.R")
-
-# Load PPI network ####
-#ppi_network <- read.delim("data/ppi_network.txt", 
-#                          stringsAsFactors = FALSE)
-#ppi_genes <- union(ppi_network$entrez1, ppi_network$entrez2) %>% unique()
-# symbol_entrez <- getBM(attributes <- c("entrezgene_id", "external_gene_name"), 
-#                        filters= "entrezgene_id",
-#                        values = unique(c(ppi_network$entrez1, ppi_network$entrez2)), 
-#                        mart = mart)
-# 
-# ord1 <- match(ppi_network$entrez1, symbol_entrez$entrezgene_id)
-# ord2 <- match(ppi_network$entrez2, symbol_entrez$entrezgene_id)
-# 
-# idx <- (!is.na(ord1)) & (!is.na(ord2))
-# 
-# 
-# symbol1 <- symbol_entrez$external_gene_name[ord1[idx]]
-# symbol2 <- symbol_entrez$external_gene_name[ord2[idx]]
-# ppi_network <- data.frame(symbol1, symbol2)
-# 
-# colnames(ppi_network) <- c("symbol1", "symbol2")
-# saveRDS(ppi_network, "data/ppi_network_symbol.RDS")
-
+# Load PPI network 
 ppi_network <- readRDS("data/ppi_network_symbol.RDS")
 ppi_genes <- unique(c(ppi_network$symbol1, ppi_network$symbol2))
 
-#diamond function ####
-# build_clique_db(ppi_network = ppi_network, #to be run only one time, on the entrez-id ppi network
-#                 db_folder = "./data",
-#                 db_name = "diamond_db")
+# 10.3 Function to run DIAMoND ####
 
 diamond_genes <- function(list_genes, ppi_network){
   
@@ -87,7 +75,7 @@ diamond_genes <- function(list_genes, ppi_network){
   return(list(seed=list_genes, module_genes=genes))
 }
 
-#Module Inference ####
+# 10.4 Module Inference ####
 
 #seed genes
 rna_cd4_seed <- read.table("gene_rebound_common_cd4.txt", header=F, row.names = NULL)$V1
@@ -102,7 +90,7 @@ diamond_methyl_cd8 <- diamond_genes(methyl_cd8_seed, ppi_network)
 diamond_rna_cd4 <- diamond_genes(rna_cd4_seed, ppi_network)
 diamond_rna_cd8 <- diamond_genes(rna_cd8_seed, ppi_network)
 
-#Save ####
+# Save ####
 saveRDS(diamond_methyl_cd4, "RDS_files/diamond_methyl_cd4.RDS")
 saveRDS(diamond_methyl_cd8, "RDS_files/diamond_methyl_cd8.RDS")
 saveRDS(diamond_rna_cd4, "RDS_files/diamond_rna_cd4.RDS")
@@ -126,20 +114,15 @@ module_cd8 <- intersect(diamond_rna_cd8$module_genes, diamond_methyl_cd8$module_
 df <- data.frame(module_genes = module_cd8, is_seed_gene = module_cd8 %in% union(diamond_rna_cd8$seed, diamond_methyl_cd8$seed))
 write.xlsx( df, file="DIAMOnD_modules.xlsx", sheetName="CD8 combined", append=TRUE, row.names=FALSE)
 
-#Read ####
-diamond_methyl_cd4 <- readRDS("RDS_files/diamond_methyl_cd4.RDS")
-diamond_methyl_cd8 <- readRDS("RDS_files/diamond_methyl_cd8.RDS")
-diamond_rna_cd4 <- readRDS("RDS_files/diamond_rna_cd4.RDS")
-diamond_rna_cd8 <- readRDS("RDS_files/diamond_rna_cd8.RDS")
 
-# Load files ####
+# 10.5 Load universe files ####
 #universe for seed genes
 universe_methyl <- readRDS("C:/Users/albze08/Desktop/phd/P4/methylation/RDS_files/universe_CD8.RDS") %>% as.character()
 
 universe_rna_cd4 <- readRDS("C:/Users/albze08/Desktop/phd/P4/RNAseq/RDS/universe/universe_cd4.RDS")
 universe_rna_cd8 <- readRDS("C:/Users/albze08/Desktop/phd/P4/RNAseq/RDS/universe/universe_cd8.RDS")
 
-# Enrichment ####
+# 10.6 Enrichment of MS-associated genes ####
 #Universe for modules
 universe_module_methyl <- union(universe_methyl, ppi_genes)
 
@@ -166,24 +149,14 @@ hyge_rna_cd4_module <- fisher_test(diamond_rna_cd4$module_genes, universe_module
 hyge_rna_cd8_module <- fisher_test(diamond_rna_cd8$module_genes, universe_module_cd8, intersect(MS_genes,universe_module_cd8))
 
 
-#Overlap between modules ####
+# 10.7 Overlap between modules ####
 fisher_test(methyl_cd4_seed, union(universe_methyl, universe_rna_cd4), rna_cd4_seed)
 fisher_test(diamond_methyl_cd4$module_genes, union(universe_module_methyl, universe_module_cd4), diamond_rna_cd4$module_genes)
 
 fisher_test(methyl_cd8_seed, union(universe_methyl, universe_rna_cd8), rna_cd8_seed)
 fisher_test(diamond_methyl_cd8$module_genes, union(universe_module_methyl, universe_module_cd8), diamond_rna_cd8$module_genes)
 
-#library("ggvenn")
-# p1 <- ggvenn(list(methyl=diamond_methyl_cd4$module_genes, rna=diamond_rna_cd4$module_genes), c("methyl","rna"),
-#              show_percentage = F)
-# p2 <- ggvenn(list(methyl=diamond_methyl_cd8$module_genes, rna=diamond_rna_cd8$module_genes), c("methyl","rna"),
-#              show_percentage = F)
-# 
-# pdf("figures_manus/Overlap_modules_diamond.pdf")
-# ggarrange(p1,p2, nrow=1, ncol=2)
-# dev.off()
-
-# Plot enrichment ####
+# 10.8 Plot enrichment ####
 df <- rbind(hyge_methyl_cd4[1,1:3], hyge_methyl_cd8[1,1:3], hyge_rna_cd4[1,1:3], hyge_rna_cd8[1,1:3],
             hyge_methyl_cd4_module[1,1:3], hyge_methyl_cd8_module[1,1:3], hyge_rna_cd4_module[1,1:3], hyge_rna_cd8_module[1,1:3])
 
