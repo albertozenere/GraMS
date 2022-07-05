@@ -1,21 +1,19 @@
-###############################################################################
-# Batch correction with Combat_seq 
-###############################################################################
-
+# This script performes batch correction of RNA-seq data
 # Created and modified by Alberto Zenere, 2021-04-11
 
-# 0.1 Setup
-# 0.2 Define functions that will be used later on
-# 1.1 Import files and re-format
-# 1.2 PCA before batch correction
-# 1.3 batch correction with Combat_seq 
-# 1.4 PCA after batch correction
+# 2. Batch correction with Combat_seq ####
+
+# 2.1 Setup
+# 2.2 Define functions that will be used later on
+# 2.1 Import files and re-format
+# 2.2 PCA before batch correction
+# 2.3 batch correction with Combat_seq 
+# 2.4 PCA after batch correction
 
 rm(list=ls()) # remove all entries in the global environment 
 
-################
-## 0.1 Setup  ##
-################
+
+# 2.1 Setup  ####
 
 #Set the virtual environment folder as R library
 pathlist <- .libPaths();
@@ -35,11 +33,10 @@ RDS_folder <- "RDS/"
 data_folder <- "data/"
 figure_folder <- "figures/"
 
-####################################################
-# 0.2 Define functions that will be used later on ##
-####################################################
 
-#function to create heatmap taken by https://rdrr.io/bioc/ChAMP/src/R/champ.SVD.R
+# 2.2 Define functions that will be used later on ####
+
+#function to create heatmap taken from https://rdrr.io/bioc/ChAMP/src/R/champ.SVD.R
 drawheatmap <- function(svdPV.m)
 {
   myPalette <- c("darkred","red","orange","pink","white");
@@ -52,9 +49,7 @@ drawheatmap <- function(svdPV.m)
 }
 
 
-###################################
-# 1.1 Import files and re-format ##
-###################################
+# 2.1 Import files and re-format ####
 
 #Import
 metadata <- read_excel(paste0(data_folder, "Md.xlsx"))
@@ -79,9 +74,8 @@ stopifnot(colnames(count) == metadata$NGI_ID)
 saveRDS(metadata, file = paste0(RDS_folder, "metadata.RDS"))
 saveRDS(count, file = paste0(RDS_folder, "count.RDS"))
 
-####################################
-# 1.2 PCA before batch correction ##
-####################################
+
+# 2.2 PCA before batch correction ####
 
 #Load
 metadata <- readRDS(paste0(RDS_folder, "metadata.RDS"))
@@ -133,9 +127,8 @@ axis(1,at=1:topPCA,labels=paste("PCA",1:topPCA,sep=""),las=2)
 
 dev.off()
 
-#########################################
-# 1.3 batch correction with Combat_seq ##
-#########################################
+
+# 1.3 batch correction with Combat_seq ####
 
 covar_mat <- data.frame(cbind(metadata$Sample_Group, metadata$State)) # variables to keep
 colnames(covar_mat) <- c("Sample_Group", "State")
@@ -144,9 +137,8 @@ count_adjusted <- ComBat_seq(count, batch=metadata$Library_Batch, group=NULL, co
 #save
 saveRDS(count_adjusted, file = paste0(RDS_folder, "count_adjusted.RDS"))
 
-###################################
-# 1.4 PCA after batch correction ##
-###################################
+
+# 1.4 PCA after batch correction ####
 
 count_adjusted <- readRDS(paste0(RDS_folder, "count_adjusted.RDS"))
 
@@ -195,13 +187,6 @@ plot(count_pca$sdev[1:topPCA]^2/sum(count_pca$sdev^2), type = "b", xlab="", ylab
 axis(1,at=1:topPCA,labels=paste("PCA",1:topPCA,sep=""),las=2)
 
 dev.off()
-
-
-
-
-
-
-
 
 
 
