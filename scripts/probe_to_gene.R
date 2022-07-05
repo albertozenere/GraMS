@@ -1,3 +1,5 @@
+# Auxiliary function used by multiple scripts to map CpGs to genes
+
 probe_to_gene <- function(cpg){
 
   stopifnot(class(cpg)=="character")
