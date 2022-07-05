@@ -1,18 +1,29 @@
+# This script generate figure 4 (alluvial plot of differential analysis)
+# Created and modified by Alberto Zenere, 2021-15-12
+# 08_Figure_4 ####
+# 8.1 Setup
+# 8.2 Load files
+# 8.3 Function to generate alluvial plot
+# 8.4 Alluvial plot for RNA-seq
+# 8.5 Alluvial plot for Methylation
+# 8.6 Combine alluvial plots
 
+
+# 8.1 Setup ####
 rm(list=ls()) # remove all entries in the global environment 
 
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/graMS/Lib/R/library"
 .libPaths(newpath)
 
-# Set directory structure ------------------------------------------------------
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
-# Load packages ----------------------------------------------------------------
+# Load packages 
 
 pack_R <- c("limma","stringr","dplyr","tidyverse","pracma","ggrepel")
 
@@ -29,10 +40,11 @@ library("ggalluvial")
 
 set.seed(206)
 
-#Load ProbeFeatures
+# 8.2 Load files ####
+# Load ProbeFeatures
 ProbeFeatures <- readRDS(file=paste0(FOLDER_RDS, "TH2636_ProbeFeatures_211123.RDS"))
 
-# Load methyl DMP ####
+# Load methyl DMP 
 CD4_3rd_HP_methyl <- readRDS(paste0(FOLDER_RDS, "DMR/CD4_3rd_HP_methyl.RDS"))
 CD4_PP_HP_methyl <- readRDS(paste0(FOLDER_RDS, "DMR/CD4_PP_HP_methyl.RDS"))
 CD4_3rd_MS_methyl <- readRDS(paste0(FOLDER_RDS, "DMR/CD4_3rd_MS_methyl.RDS"))
@@ -79,7 +91,7 @@ CD8_3rd_MS_rna_all <- readRDS(paste0(FOLDER_RDS, "DMG/CD8_3rd_MS_rna_all.RDS"))
 CD8_PP_MS_rna_all <- readRDS(paste0(FOLDER_RDS, "DMG/CD8_PP_MS_rna_all.RDS"))
 
 
-
+# 8.3 Function to generate alluvial plot ####
 alluvial_plot_methyl <- function(beta_values,cpg){
   stopifnot(length(cpg)==nrow(beta_values))
   
@@ -232,7 +244,7 @@ alluvial_plot_rna <- function(rna_values){
   
 }
 
-# RNA-seq ####
+# 8.4 Alluvial plot for RNA-seq ####
 #CD4 HP
 deg <- union(rownames(CD4_3rd_HP_rna), rownames(CD4_PP_HP_rna))
 values_CD4_HP <- cbind(CD4_3rd_HP_rna_all[deg,"logFC"],
@@ -268,7 +280,7 @@ p_CD8_MS_rna <- alluvial_plot_rna(values_CD8_MS)
 
 
 
-# Methylation ####
+# 8.5 Alluvial plot for Methylation ####
 #CD4 HP 
 cpg <- union(rownames(CD4_3rd_HP_methyl), rownames(CD4_PP_HP_methyl))
 beta_values_CD4_HP <- cbind(CD4_3rd_HP_methyl_all[cpg,"logFC"],
@@ -302,7 +314,7 @@ colnames(beta_values_CD8_MS) <- c("Third_First", "PP_Third")
 p_CD8_MS_methyl <- alluvial_plot_methyl(beta_values_CD8_MS,cpg)
 
 
-# Combine plots ####
+# 8.6 Combine alluvial plots ####
 pdf("figures_manus/alluvial.pdf", width=19, height=6)
 ggarrange(p_CD4_HP_methyl, p_CD4_MS_methyl, p_CD8_HP_methyl, p_CD8_MS_methyl, 
           p_CD4_HP_rna, p_CD4_MS_rna, p_CD8_HP_rna, p_CD8_MS_rna, 
