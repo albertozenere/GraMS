@@ -1,7 +1,14 @@
+# This script generates Figure 3 (Correlation bewteen 3rd-1st and PP-3rd)
+# Created and modified by Alberto Zenere, 2021-14-11
+
+# 06.Figure_3 ####
+# 6.1 Setup 
+# 6.2 Load Differential analysis results
+# 6.3 Correlation plots
 
 rm(list=ls()) # remove all entries in the global environment 
 
-
+# 6.1 Setup ####
 pathlist <- .libPaths();
 newpath <-  "C:/Users/albze08/.conda/envs/P3/Lib/R/library"
 .libPaths(newpath)
@@ -14,15 +21,14 @@ for (i in 1:length(pack_R)) {
 require("lumi")
 require("pracma")
 
-# Set directory structure ####
+# Set directory structure 
 main_dir <-"C:/Users/albze08/Desktop/phd/P4/methylation"
 FOLDER_RDS <- "RDS_files/"
 FOLDER_FIGURES <- "figures/"
 setwd("C:/Users/albze08/Desktop/phd/P4/methylation")
 
 
-
-# Load ####
+# 6.2 Load Differential analysis results ####
 #CD4 methylation
 CD4_PP_3rd_HP_methyl <- readRDS("RDS_files/DMR/CD4_PP_HP_methyl_all.RDS")
 CD4_PP_3rd_MS_methyl <- readRDS("RDS_files/DMR/CD4_PP_MS_methyl_all.RDS")
@@ -52,8 +58,7 @@ CD8_3rd_1st_HP_rna <- readRDS("RDS_files/DMG/CD8_3rd_HP_rna_all.RDS"); CD8_3rd_1
 CD8_3rd_1st_MS_rna <- readRDS("RDS_files/DMG/CD8_3rd_MS_rna_all.RDS"); CD8_3rd_1st_MS_rna <- CD8_3rd_1st_MS_rna[rownames(CD8_PP_3rd_HP_rna),]
 
 
-
-# Correlation plots CD4 ####
+# 6.3 Correlation plots ####
 pdf("figures_manus/Correlations.pdf", width=10)
 
 par(mfrow=c(2,4))
