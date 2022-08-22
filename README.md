@@ -1,5 +1,5 @@
 
- # Analysis of longitudinal epigenetic and transcriptomic changes during pregnancy in healthy and MS individuals
+ # Epigenetic and transcriptomic changes in CD4+ and CD8+ T cells during pregnancy in patients with multiple sclerosis
 *Alberto Zenere<sup>1,a</sup>, Sandra Hellberg<sup>2,a</sup>, Georgia Papapavlou Lingehed<sup>3,a</sup>, Maria Svenvik<sup>3,4</sup>, Johan Mellergård<sup>5</sup>, Charlotte Dahle<sup>6</sup>, Mohsen Khademi<sup>7</sup>, Tomas Olsson<sup>7</sup>, Claudio Altafini<sup>1</sup>, Maria C. Jenmalm<sup>3</sup>, Jan Ernerudh<sup>6</sup> and Mika Gustafsson<sup>2</sup>*
 
 <sup>1</sup> Division of Automatic Control, Department of Electrical Engineering, Linköping University, Linköping, Sweden.
