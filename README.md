@@ -13,8 +13,11 @@
 <sup>a</sup>These authors have contributed equally to the work and should be regarded as first joint authors
 
 
+## Publication
+Journal of Neuroinflammation, 2023 Apr 27;20(1):98. doi: 10.1186/s12974-023-02781-2.
 
-## SUMMARY
+
+## Summary
 While clinical studies have linked pregnancy to an amelioration of multiple sclerosis (MS) disease activity, the underlying mechanisms are unclear. We here report the dynamics of global epigenetic and transcriptomic changes in CD4+ and CD8+ T cells, longitudinally obtained during the course of pregnancy in MS and healthy controls. Both DNA methylation and RNA sequencing revealed a prominent regulation, mostly peaking in the 3rd trimester and reversing post-partum. This rebound pattern was found to represent a general adaptation of the maternal immune system, with only minor differences between patients and controls. By using a network-based approach, we highlighted several genes at the core of this pregnancy-induced regulation that were enriched for genes previously reported to be involved in MS. Overall, our findings indicate that pregnancy modulates peripheral T cells and suggest that these changes could be related to the amelioration of disease activity during and worsening after pregnancy.
 
 
